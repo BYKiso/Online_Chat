@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+    <title>Home</title>
+    <script>
+        // JavaScript to confirm logout
+        function confirmLogout(event) {
+            if (!confirm("Are you sure you want to log out?")) {
+                event.preventDefault(); // Prevent logout if user cancels
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <!-- Header and Navbar -->
+    <header>
+        <nav class="navbar">
+            <a href="/" class="nav-link active">Home</a>
+            <a href="/chats" class="nav-link">Chats</a>
+            <a href="/addFriend" class="nav-link">Add Friends</a>
+            <a href="/friendRequests" class="nav-link">Friend Requests</a>
+            <a href="/viewFriends" class="nav-link">View Friends</a>
+            <a href="{{ url_for('logout') }}" class="nav-link" onclick="confirmLogout(event)">Logout</a>
+        </nav>
+    </header>
+
+    <main class="main-container">
+        {% if username %}
+        <h1 class="main-title">Welcome, {{ username }}!</h1>
+        <p class="main-description">Welcome to the Online Chat Application. You can start chatting and managing your friends!</p>
+        {% else %}
+        <h1 class="main-title">Welcome to the Online Chat Application!</h1>
+        <p class="main-description">Please log in to start chatting and managing your friends.</p>
+        {% endif %}
+    </main>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <div class="flash">
+            {% for message in messages %}
+            <p class="flash-success">{{ message }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2024 Your Website</p>
+        <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a>
+    </footer>
+</body>
+
+</html>

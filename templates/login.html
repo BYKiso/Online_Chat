@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous" />
+    <title>Login</title>
+    <script>
+        // JavaScript function to validate the login form
+        function validateLoginForm() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            // Check if username or password fields are empty
+            if (username.trim() === "") {
+                alert("Username is required.");
+                return false; // Prevent form submission
+            }
+            if (password.trim() === "") {
+                alert("Password is required.");
+                return false; // Prevent form submission
+            }
+
+            // If validation passes, allow form submission
+            return true;
+        }
+    </script>
+    <style>
+        /* Body and background */
+        body {
+            background-color: #121212;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Container Styling */
+        .container {
+            margin-top: 100px;
+            padding: 20px;
+        }
+
+        /* Card Styling */
+        .card {
+            background-color: #181818;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Card Header */
+        .card-header {
+            background-color: #0096FF;
+            color: #fff;
+            font-size: 24px;
+            text-align: center;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+        }
+
+        /* Make the heading bold */
+        .card-header h3 {
+            font-weight: bold; /* Explicitly target the h3 and make it bold */
+        }
+
+        /* Card Body */
+        .card-body {
+            padding: 30px;
+        }
+
+        /* Form Groups */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            color: #fff;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .form-control {
+            background-color: #222;
+            border: 2px solid #0096FF;
+            color: #fff;
+            border-radius: 10px;
+            padding: 12px;
+            width: 100%;
+            font-size: 16px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: #FF69B4;
+            box-shadow: 0 0 10px rgba(255, 105, 180, 0.6);
+            outline: none;
+        }
+
+        /* Button Styling */
+        .btn {
+            background-color: #0096FF;
+            color: #fff;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .btn:hover {
+            background-color: #FF69B4;
+            transform: scale(1.05);
+        }
+
+        .btn:focus {
+            outline: none;
+        }
+
+        /* Alert Styling */
+        .alert {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .alert-info {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .alert-danger {
+            background-color: #FF4136;
+            color: white;
+        }
+
+        /* Footer Text */
+        p {
+            color: #fff;
+            font-size: 14px;
+        }
+
+        /* Link Styling */
+        a {
+            color: #0096FF;
+            text-decoration: none;
+        }
+
+        a:hover {
+            color: #FF69B4;
+        }
+
+        /* Responsive Styling */
+        @media (max-width: 768px) {
+            .col-md-6 {
+                padding: 20px;
+                margin: 10px;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h3>Login</h3>
+                    </div>
+                    <div class="card-body">
+
+                        <!-- Flash Message Handling -->
+                        {% with messages = get_flashed_messages() %}
+                        {% if messages %}
+                        <div class="alert alert-info" role="alert">
+                            {{ messages[0] }}
+                        </div>
+                        {% endif %}
+                        {% endwith %}
+
+                        <!-- Display error message if it exists -->
+                        {% if error %}
+                        <div class="alert alert-danger" role="alert">
+                            {{ error }}
+                        </div>
+                        {% endif %}
+
+                        <!-- Login form -->
+                        <form method="POST" action="{{ url_for('login') }}" onsubmit="return validateLoginForm()">
+                            <div class="form-group">
+                                <label for="username">Username</label>
+                                <input type="text" id="username" name="username" class="form-control" required />
+                            </div>
+                            <div class="form-group">
+                                <label for="password">Password</label>
+                                <input type="password" id="password" name="password" class="form-control" required />
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">Login</button>
+                        </form>
+                    </div>
+                    <div class="card-footer text-center">
+                        <p>Don't have an account? <a href="{{ url_for('register') }}">Register here</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript dependencies -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+    <title>Add Friends</title>
+    <script>
+        // JavaScript to confirm friend requests
+        function confirmFriendRequest(username) {
+            return confirm(`Are you sure you want to send a friend request to ${username}?`);
+        }
+
+        // JavaScript to confirm logout
+        function confirmLogout(event) {
+            if (!confirm("Are you sure you want to log out?")) {
+                event.preventDefault(); // Prevent logout if user cancels
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <!-- Header and Navbar -->
+    <header>
+        <nav class="navbar">
+            <a href="/" class="nav-link">Home</a>
+            <a href="/chats" class="nav-link">Chats</a>
+            <a href="/addFriend" class="nav-link active">Add Friends</a>
+            <a href="/friendRequests" class="nav-link">Friend Requests</a>
+            <a href="/viewFriends" class="nav-link">View Friends</a>
+            <a href="{{ url_for('logout') }}" class="nav-link" onclick="confirmLogout(event)">Logout</a>
+        </nav>
+    </header>
+
+    <main class="main-container">
+        <h1 class="main-title">Add Friends</h1>
+        <p class="main-description">Search for friends by username and send them a friend request.</p>
+
+        <!-- Friend Search Form -->
+        <form method="POST" action="/addFriend" class="search-form">
+            <div class="form-group">
+                <input type="text" class="form-control" id="username" name="username" placeholder="Enter username" required>
+            </div>
+            <button type="submit" class="submit-btn">Search</button>
+        </form>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <div class="flash">
+            {% for message in messages %}
+            <p class="flash-success">{{ message }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <!-- Search Results -->
+        {% if results %}
+        <h2 class="results-title">Search Results</h2>
+        <ul class="list-group">
+            {% for user in results %}
+            <li class="list-group-item">
+                <span>{{ user[0] }}</span>
+                {% if friend_status[user[0]] == 'friends' %}
+                <button class="btn btn-secondary btn-sm" disabled>Friends</button>
+                {% elif friend_status[user[0]] == 'pending' %}
+                <button class="btn btn-warning btn-sm" disabled>Request Pending</button>
+                {% else %}
+                <button class="btn btn-success btn-sm" onclick="if(confirmFriendRequest('{{ user[0] }}')) { window.location.href = '/sendFriendRequest?to={{ user[0] }}'; }">Add Friend</button>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+        {% elif search_query %}
+        <p class="error">No users found matching "{{ search_query }}".</p>
+        {% endif %}
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2024 Your Website</p>
+        <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a>
+    </footer>
+</body>
+
+</html>

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat Application</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" /> <!-- Linking CSS -->
+  <!-- Include Socket.io Client -->
+  <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <header>
+    <nav class="navbar">
+      <a href="/" class="nav-link">Home</a>
+      <a href="/chats" class="nav-link active">Chats</a>
+      <a href="/addFriend" class="nav-link">Add Friends</a>
+      <a href="/friendRequests" class="nav-link">Friend Requests</a>
+      <a href="/viewFriends" class="nav-link">View Friends</a>
+      <a href="{{ url_for('logout') }}" class="nav-link" onclick="confirmLogout(event)">Logout</a>
+    </nav>
+  </header>
+
+  <!-- Main Content -->
+  <div class="main-container">
+    <h1 class="main-title">Chat with Friends</h1>
+    <p class="main-description">Select a friend to start chatting</p>
+
+    <!-- Chat Layout -->
+    <div class="chat-wrapper">
+
+      <!-- Friends List Section (Right Side) -->
+      <div class="friends-list">
+        <h3>Your Friends</h3>
+        <ul>
+          {% for friend in friends %}
+            <li>
+              <a href="#" onclick="selectFriend('{{ friend[0] }}')">{{ friend[0] }}</a>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <!-- Chat Box Section (Left Side) -->
+      <div class="chat-container">
+        <h2 id="chat-header">Select a friend to chat</h2>
+
+        <div class="chat-box" id="chat-box">
+          <!-- Chat messages will appear here -->
+        </div>
+
+        <div class="input-container">
+          <!-- Emoji Button -->
+          <button type="button" class="emoji-btn" onclick="toggleEmojiPicker()">😊</button>
+
+          <!-- Message Input Field -->
+          <input type="text" id="message-input" placeholder="Type a message" disabled /> <!-- Disabled until a friend is selected -->
+
+          <!-- Send Button -->
+          <button class="submit-btn" onclick="sendMessage()" disabled>Send</button> <!-- Disabled until a friend is selected -->
+        </div>
+
+        <!-- Emoji Picker (Hidden initially) -->
+        <div id="emoji-picker" class="emoji-picker">
+          <span class="emoji" onclick="insertEmoji('😊')">😊</span>
+          <span class="emoji" onclick="insertEmoji('😂')">😂</span>
+          <span class="emoji" onclick="insertEmoji('❤️')">❤️</span>
+          <span class="emoji" onclick="insertEmoji('😍')">😍</span>
+          <span class="emoji" onclick="insertEmoji('😎')">😎</span>
+          <span class="emoji" onclick="insertEmoji('👍')">👍</span>
+          <span class="emoji" onclick="insertEmoji('😭')">😭</span>
+          <span class="emoji" onclick="insertEmoji('🔥')">🔥</span>
+          <!-- Add more emojis as needed -->
+        </div>
+      </div>
+
+    </div> <!-- End of chat-wrapper -->
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <p>Powered by Your Company</p>
+    <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a>
+  </footer>
+
+  <script>
+    const currentUser = '{{ session["username"] }}';  // Get logged-in username from Flask session
+    let friendUsername = '';  // Store the selected friend's username
+
+    // Socket.io connection
+    const socket = io.connect('http://' + document.domain + ':' + location.port);
+
+    // Listen for incoming messages
+    socket.on('receive_message', function(data) {
+      const chatBox = document.getElementById('chat-box');
+
+      // Create a new message element
+      const messageElement = document.createElement('div');
+      messageElement.classList.add('message');
+
+      // Check who sent the message
+      if (data.username === currentUser) {
+        messageElement.classList.add('user');
+      } else {
+        messageElement.classList.add('friend');
+      }
+
+      // Set the text of the message
+      messageElement.textContent = `${data.username}: ${data.message}`;
+      chatBox.appendChild(messageElement);
+
+      // Scroll to the bottom of the chat box
+      chatBox.scrollTop = chatBox.scrollHeight;
+    });
+
+    // Function to select a friend and start a chat
+    function selectFriend(friend) {
+      friendUsername = friend;
+      document.getElementById('chat-header').textContent = `Chat with ${friendUsername}`;
+
+      // Enable message input and send button
+      document.getElementById('message-input').disabled = false;
+      document.querySelector('.submit-btn').disabled = false;
+
+      // Join the chat room for the selected friend
+      socket.emit('join_chat', { username: currentUser, friend_username: friendUsername });
+
+      // Clear previous messages in the chat box
+      const chatBox = document.getElementById('chat-box');
+      chatBox.innerHTML = '';
+
+      // Load previous chat messages
+      loadChatHistory();
+    }
+
+    // Function to load previous chat history
+    function loadChatHistory() {
+      fetch(`/chat/${friendUsername}`)
+        .then(response => response.json())
+        .then(data => {
+          const chatBox = document.getElementById('chat-box');
+          data.messages.forEach(message => {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message', message.sender === currentUser ? 'user' : 'friend');
+            messageElement.textContent = `${message.sender}: ${message.message}`;
+            chatBox.appendChild(messageElement);
+          });
+
+          // Scroll to the bottom
+          chatBox.scrollTop = chatBox.scrollHeight;
+        });
+    }
+
+    // Function to send a message
+    function sendMessage() {
+      const messageInput = document.getElementById('message-input');
+      const messageText = messageInput.value.trim();
+
+      if (messageText !== '' && friendUsername) {
+        // Emit the message to the server
+        socket.emit('send_message', { message: messageText, friend_username: friendUsername });
+
+        // Add user message to the chat box immediately
+        const chatBox = document.getElementById('chat-box');
+        const userMessage = document.createElement('div');
+        userMessage.classList.add('message', 'user');
+        userMessage.textContent = `${currentUser}: ${messageText}`;
+        chatBox.appendChild(userMessage);
+
+        // Scroll to the bottom
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        // Clear the input field
+        messageInput.value = '';
+      }
+    }
+
+    // Allow sending messages with Enter key
+    document.getElementById('message-input').addEventListener('keypress', function(event) {
+      if (event.key === 'Enter') {
+        sendMessage();
+      }
+    });
+
+    // Confirm logout before proceeding
+    function confirmLogout(event) {
+      const confirmation = confirm("Are you sure you want to logout?");
+      if (!confirmation) {
+        event.preventDefault();
+      }
+    }
+
+    // Toggle emoji picker visibility
+    function toggleEmojiPicker() {
+      const emojiPicker = document.getElementById('emoji-picker');
+      const messageInput = document.getElementById('message-input');
+
+      // Position the emoji picker below the input
+      const inputRect = messageInput.getBoundingClientRect();
+      emojiPicker.style.left = `${inputRect.left}px`;
+      emojiPicker.style.top = `${inputRect.bottom + window.scrollY}px`;
+
+      // Toggle visibility
+      emojiPicker.style.display = emojiPicker.style.display === 'block' ? 'none' : 'block';
+    }
+
+    // Insert emoji into message input field
+    function insertEmoji(emoji) {
+      const messageInput = document.getElementById('message-input');
+      messageInput.value += emoji;  // Append the selected emoji to the message
+      messageInput.focus();  // Keep focus on the input field
+    }
+  </script>
+
+</body>
+</html>

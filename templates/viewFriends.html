@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+    <title>View Friends</title>
+    <script>
+        // JavaScript function to confirm logout
+        function confirmLogout(event) {
+            event.preventDefault(); // Prevent the default behavior of the link
+            const confirmation = confirm("Are you sure you want to log out?");
+            if (confirmation) {
+                // Redirect to logout URL if confirmed
+                window.location.href = event.target.href;
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <!-- Header and Navbar -->
+    <header>
+        <nav class="navbar">
+            <a href="/" class="nav-link">Home</a>
+            <a href="/chats" class="nav-link">Chats</a>
+            <a href="/addFriend" class="nav-link">Add Friends</a>
+            <a href="/friendRequests" class="nav-link">Friend Requests</a>
+            <a href="/viewFriends" class="nav-link active">View Friends</a>
+            <a href="{{ url_for('logout') }}" class="nav-link" onclick="confirmLogout(event)">Logout</a>
+        </nav>
+    </header>
+
+    <main class="main-container">
+        <h1 class="main-title">Your Friends</h1>
+
+        {% if friends %}
+        <h2 class="results-title">List of Friends</h2>
+        <ul class="list-group">
+            {% for friend in friends %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                {{ friend[0] }} <!-- Displaying the friend's username -->
+                <a href="{{ url_for('unadd_friend', friend_username=friend[0]) }}" class="btn btn-danger btn-sm">Remove</a>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="error">You have no friends yet.</p>
+        {% endif %}
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2024 Your Website</p>
+        <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a>
+    </footer>
+
+    <!-- JavaScript for Bootstrap and jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+    <title>Friend Requests</title>
+    <script>
+        // Confirm logout function
+        function confirmLogout(event) {
+            if (!confirm("Are you sure you want to log out?")) {
+                event.preventDefault();  // Prevent the logout if the user cancels
+            }
+        }
+    </script>
+</head>
+
+<body>
+
+    <!-- Navigation Bar -->
+    <header>
+        <nav class="navbar">
+            <a class="nav-link" href="/">Home</a>
+            <a class="nav-link" href="/chats">Chats</a>
+            <a class="nav-link" href="/addFriend">Add Friends</a>
+            <a class="nav-link active" href="/friendRequests">Friend Requests</a>
+            <a class="nav-link" href="/viewFriends">View Friends</a>
+            <a class="nav-link" href="{{ url_for('logout') }}" onclick="confirmLogout(event)">Logout</a>
+        </nav>
+    </header>
+
+    <main class="main-container">
+        <!-- Friend Requests Title (Bold) -->
+        <h1 class="main-title" style="font-weight: bold;">Friend Requests</h1>
+        <p class="main-description">Manage your pending friend requests here.</p>
+
+        <!-- Flash Messages for feedback -->
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <div class="flash">
+            {{ messages[0] }}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <!-- Display Pending Friend Requests -->
+        {% if pending_requests %}
+        <h2 class="results-title">Pending Friend Requests</h2>
+        <ul class="list-group">
+            {% for request in pending_requests %}
+            <li class="list-group-item">
+                <span>{{ request[1] }} <!-- Displaying the sender of the request (from_user) --></span>
+                <div>
+                    <!-- Accept and Decline Buttons -->
+                    <a href="{{ url_for('accept_friend_request', request_id=request[0]) }}" class="btn btn-success btn-sm mr-2">Accept</a>
+                    <a href="{{ url_for('decline_friend_request', request_id=request[0]) }}" class="btn btn-danger btn-sm">Decline</a>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="error">You have no pending friend requests.</p>
+        {% endif %}
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2024 Your Website | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
+    </footer>
+
+    <!-- Include necessary JS files -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+</body>
+
+</html>
